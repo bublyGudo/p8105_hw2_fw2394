@@ -1,0 +1,8 @@
+---
+title: "p8105_hw2_fw2394"
+author: "Fang Wang"
+date: "2024-09-29"
+output: github_document
+---
+
+
