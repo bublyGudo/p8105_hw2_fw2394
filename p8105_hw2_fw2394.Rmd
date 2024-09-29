@@ -16,6 +16,7 @@ setwd("/Users/fangwang/Downloads/P8105 Data Science I/p8105_hw2_fw2394")
 ```{r library}
 library (tidyverse)
 library (dplyr)
+library (readxl)
 ```
 
 ## Load the dataset:
@@ -90,7 +91,65 @@ nyc_transit_long |>
   count() 
 ```
 
+# Problem 2
 
+## Load dataset "Mr. Trash Wheel" and clean_up:
+```{r mr}
+mr_trash_wheel = read_excel ("./data/202309 Trash Wheel Collection Data.xlsx", sheet = "Mr. Trash Wheel", skip = 1) |> 
+  janitor::clean_names() |> 
+  filter (!is.na(dumpster)) |> 
+  select (-x15, -x16) |> 
+  mutate(sports_balls = as.integer(round(sports_balls)))|> 
+  mutate (
+    source = "mr_trash_wheel"
+  )
+```
 
+## Load dataset "Professor Trash Wheel" and clean_up:
+```{r professional}
+professional_trash_wheel = read_excel ("./data/202309 Trash Wheel Collection Data.xlsx", sheet = "Professor Trash Wheel", skip =1) |> 
+  janitor::clean_names() |> 
+  filter (!is.na(dumpster)) |> 
+  mutate(year = as.character(year)) |> 
+   mutate (
+    source = "professional_trash_wheel",
+    sports_balls = "NA"
+  ) |> 
+  relocate(dumpster, month, year, date, weight_tons, volume_cubic_yards, plastic_bottles,polystyrene, cigarette_butts, glass_bottles, wrappers, sports_balls, homes_powered, source)
+```
 
+## Load dataset "Gwynnda Trash Wheel" and clean_up:
+```{r Gwynnda}
+gwynnda_trash_wheel = read_excel ("./data/202309 Trash Wheel Collection Data.xlsx", sheet = "Gwynnda Trash Wheel", skip = 1) |> 
+  janitor::clean_names() |> 
+  filter (!is.na(dumpster)) |> 
+  mutate(year = as.character(year)) |> 
+   mutate (
+    source = "gwynnda_trash_wheel",
+    glass_bottles = "NA",
+    sports_balls = "NA"
+  ) |> 
+  relocate(dumpster, month, year, date, weight_tons, volume_cubic_yards, plastic_bottles,polystyrene, cigarette_butts, glass_bottles, wrappers, sports_balls, homes_powered,source)
+```
 
+## Combine Mr. Trash Wheel and Professional Trash Wheel:
+```{r combined_mr_prof}
+mr_prof_gwy = rbind (mr_trash_wheel, 
+                     professional_trash_wheel, 
+                     gwynnda_trash_wheel)
+```
+**The final dataset "mr_prof_gwy" contains 845 observations and 15 variables including additional variable called "source".**
+
+## Calculate the total weight of trash collected by Professor Trash Wheel:
+```{r total_prof}
+mr_prof_gwy |> 
+  filter(source == "professional_trash_wheel") |> 
+  summarise(total_weight = sum(weight_tons, na.rm = TRUE))
+```
+
+## Calculate the total number of cigarette butts collected by Gwynnda in June of 2022:
+```{r cig_gwy}
+mr_prof_gwy |> 
+  filter(source == "gwynnda_trash_wheel", year == "2022", month =="June")|> 
+  summarise(number_cig = sum(cigarette_butts, na.rm = TRUE))
+```
