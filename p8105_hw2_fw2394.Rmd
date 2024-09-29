@@ -3,6 +3,94 @@ title: "p8105_hw2_fw2394"
 author: "Fang Wang"
 date: "2024-09-29"
 output: github_document
+editor_options: 
+  chunk_output_type: console
 ---
+# Problem 1
+## Set up the working_directory: 
+```{r working_directory}
+setwd("/Users/fangwang/Downloads/P8105 Data Science I/p8105_hw2_fw2394")
+```
+
+## Load necessary libraries:
+```{r library}
+library (tidyverse)
+library (dplyr)
+```
+
+## Load the dataset:
+```{r data_clean}
+nyc_transit =
+  read_csv ("./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv") |> janitor::clean_names() |> 
+  select (line, station_name, station_latitude, station_longitude, route1:route11, entry, vending, entrance_type, ada) |> 
+mutate(
+    entry = case_match(
+      entry,
+      "YES" ~ TRUE,
+      "NO" ~ FALSE
+    )
+  )
+str(nyc_transit)
+```
+**The dataset contains 19 variables, including line, station_name, station_latitude, station_longitude, route1 to route11, entry, vending, entrance_type, and ada. It has a total of 1,868 observations, meaning there are 1,868 rows and 19 columns.So far, I have performed the following steps to clean and organize the data. First, I converted all variable names to lowercase using janitor::clean_names(). Then, I selected the 19 relevant columns using the select() function. Finally, I transformed the entry variable from a character type ("YES" or "NO") to a logical type (TRUE or FALSE) using case_match(). As a result, the dataset is now tidier and more structured compared to the original version. **
+
+## Find how many distinct stations:
+```{r distinct_station}
+combined_station_line = nyc_transit |> 
+  mutate (station_name_line = paste (station_name, line, sep = " ")) 
+
+unique_stations = 
+  combined_station_line |> 
+  select (station_name_line) |>
+  distinct()
+nrow(unique_stations)
+```
+
+## Find how many stations that are ADA compliant:
+```{r ada}
+ada_compliant =
+  nyc_transit |> 
+  filter (ada == "TRUE")
+nrow(ada_compliant)
+```
+
+## Calcuate the proportion of stations without vending allow entrance:
+```{r prop}
+proportion_allow_entrance = nyc_transit |> 
+  filter(vending == "NO") |>
+  summarize(prop = mean(entry == "TRUE"))
+print(proportion_allow_entrance)
+```
+
+## Reformat data so that route number and route name are distinctive varaibles:
+```{r route_number_name}
+nyc_transit_long = combined_station_line |> 
+  mutate(across(route1:route11, as.character)) |> 
+  pivot_longer(
+    cols = route1:route11,
+    names_to = "route_number",
+    values_to = "route_name"
+  ) |> 
+  select (route_number, route_name, station_name_line, everything())
+head(nyc_transit_long)
+```
+
+## To find how many distinct stations serve the A train:
+```{r A_train}
+nyc_transit_long |> 
+  filter (route_name == "A") |> 
+  distinct(station_name_line) |> 
+  count() 
+```
+
+## To find how many stations that serve the A train are ADA compliant:
+```{r A_train_ADA}
+nyc_transit_long |> 
+  filter (route_name == "A", ada == "TRUE") |> 
+  count() 
+```
+
+
+
 
 
