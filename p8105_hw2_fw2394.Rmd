@@ -4,7 +4,7 @@ author: "Fang Wang"
 date: "2024-09-29"
 output: github_document
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 # Problem 1
 ## Set up the working_directory: 
@@ -152,4 +152,98 @@ mr_prof_gwy |>
 mr_prof_gwy |> 
   filter(source == "gwynnda_trash_wheel", year == "2022", month =="June")|> 
   summarise(number_cig = sum(cigarette_butts, na.rm = TRUE))
+```
+
+# Problem 3
+
+## Load "bakers" dataset:
+```{r bakers}
+bakers = read_csv ("./data/gbb_datasets/bakers.csv") |> 
+  janitor::clean_names() |> 
+  separate(baker_name, into = c("first_name", "last_name"), sep = " ", extra = "merge")
+```
+
+## Load "bakes" dataset: 
+```{r bakes}
+bakes = read_csv ("./data/gbb_datasets/bakes.csv") |> 
+  janitor::clean_names() |> 
+  rename (
+    first_name = "baker"
+  )
+```
+
+## Combine the two datasets above:
+```{r combined_bakers}
+combined_bakers =
+  left_join(bakes, bakers, by = c("first_name", "series")) |> 
+  arrange (series, episode) |> 
+  select (series, episode, first_name, last_name, baker_age, everything())
+```
+
+## Load the dataset "results":
+```{r results}
+results = 
+  read_csv ("./data/gbb_datasets/results.csv", skip = 2) |> 
+  mutate(
+    result = case_match(
+      result,
+      "IN" ~"stayed_in",
+      "OUT"~ "eliminated",
+      "STAR BAKER" ~ "star_baker",
+      "WINNER" ~ "series_winner",
+      "Runner-up" ~ "series_runner-up",
+      "WD" ~ "withdrew"
+    )
+  ) |> 
+  mutate (
+    star_baker = if_else (result == "star_baker", TRUE, NA),
+    series_winner = if_else (result == "series_winner", TRUE, NA)
+  ) |> 
+  rename (
+    first_name = "baker"
+  )
+```
+
+## Combine to make the final dataset:
+```{r final}
+baker_final = 
+  left_join (results, combined_bakers, by = c("first_name", "series", "episode")) |> 
+  select (series, episode, first_name, last_name, baker_age, result, star_baker, series_winner, everything())
+```
+**In the data-cleaning process, I combined the first two datasets (bakers and bakes) by the common variables: first_name and series. Then, I combined all three datasets. Finally, the dataset contains 1136 observations and 13 variables.**
+
+## create a table showing the star baker and winner of each episode:
+```{r table}
+baker_final |> 
+  filter(series %in% 5:10) |> 
+  filter(star_baker == TRUE | series_winner == TRUE) |> 
+  select(series, episode, first_name, star_baker, series_winner) |> 
+  knitr::kable()
+```
+**It is expected that individuals who win 'Star Baker' multiple times are more likely to become the 'Series Winner.' However, it is surprising that some contestants, like Richard, won 'Star Baker' several times but never won the 'Series Winner'**
+
+## Load viewer dataset:
+```{r viewer}
+viewer = read_csv ("./data/gbb_datasets/viewers.csv") |> 
+  janitor::clean_names() |> 
+  pivot_longer(
+    cols = series_1:series_10,
+    names_to = "series_number",
+    values_to = "viewership"
+  )
+head(viewer, 10)
+```
+
+## Calculate the average viewership in season 1:
+```{r mean_season1}
+viewer |> 
+  filter (episode =="1") |> 
+  summarise (viewership_mean_1 = mean (viewership))
+```
+
+## Calculate the average viewership in season 5:
+```{r mean_season5}
+viewer |> 
+  filter (episode =="5") |> 
+  summarise (viewership_mean_5 = mean (viewership))
 ```
