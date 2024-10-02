@@ -95,7 +95,7 @@ nyc_transit_long |>
 
 ## Load dataset "Mr. Trash Wheel" and clean_up:
 ```{r mr}
-mr_trash_wheel = read_excel ("./data/202309 Trash Wheel Collection Data.xlsx", sheet = "Mr. Trash Wheel", skip = 1) |> 
+mr_trash_wheel = read_excel ("./data/202409 Trash Wheel Collection Data.xlsx", sheet = "Mr. Trash Wheel", skip = 1) |> 
   janitor::clean_names() |> 
   filter (!is.na(dumpster)) |> 
   select (-x15, -x16) |> 
@@ -107,29 +107,29 @@ mr_trash_wheel = read_excel ("./data/202309 Trash Wheel Collection Data.xlsx", s
 
 ## Load dataset "Professor Trash Wheel" and clean_up:
 ```{r professional}
-professional_trash_wheel = read_excel ("./data/202309 Trash Wheel Collection Data.xlsx", sheet = "Professor Trash Wheel", skip =1) |> 
+professional_trash_wheel = read_excel ("./data/202409 Trash Wheel Collection Data.xlsx", sheet = "Professor Trash Wheel", skip = 1) |> 
   janitor::clean_names() |> 
   filter (!is.na(dumpster)) |> 
   mutate(year = as.character(year)) |> 
    mutate (
     source = "professional_trash_wheel",
-    sports_balls = "NA"
+    sports_balls = NA
   ) |> 
-  relocate(dumpster, month, year, date, weight_tons, volume_cubic_yards, plastic_bottles,polystyrene, cigarette_butts, glass_bottles, wrappers, sports_balls, homes_powered, source)
+  select(dumpster, month, year, date, weight_tons, volume_cubic_yards, plastic_bottles,polystyrene, cigarette_butts, glass_bottles, plastic_bags, wrappers, sports_balls, homes_powered, source)
 ```
 
 ## Load dataset "Gwynnda Trash Wheel" and clean_up:
 ```{r Gwynnda}
-gwynnda_trash_wheel = read_excel ("./data/202309 Trash Wheel Collection Data.xlsx", sheet = "Gwynnda Trash Wheel", skip = 1) |> 
+gwynnda_trash_wheel <- read_excel("./data/202409 Trash Wheel Collection Data.xlsx", sheet = "Gwynnda Trash Wheel", skip = 1)|> 
   janitor::clean_names() |> 
   filter (!is.na(dumpster)) |> 
   mutate(year = as.character(year)) |> 
    mutate (
     source = "gwynnda_trash_wheel",
-    glass_bottles = "NA",
-    sports_balls = "NA"
+    glass_bottles = NA,
+    sports_balls = NA
   ) |> 
-  relocate(dumpster, month, year, date, weight_tons, volume_cubic_yards, plastic_bottles,polystyrene, cigarette_butts, glass_bottles, wrappers, sports_balls, homes_powered,source)
+  select(dumpster, month, year, date, weight_tons, volume_cubic_yards, plastic_bottles,polystyrene, cigarette_butts, glass_bottles, plastic_bags, wrappers, sports_balls, homes_powered, source)
 ```
 
 ## Combine Mr. Trash Wheel and Professional Trash Wheel:
@@ -138,7 +138,7 @@ mr_prof_gwy = rbind (mr_trash_wheel,
                      professional_trash_wheel, 
                      gwynnda_trash_wheel)
 ```
-**The final dataset "mr_prof_gwy" contains 845 observations and 15 variables including additional variable called "source".**
+**The final dataset "mr_prof_gwy" contains 1033 observations and 15 variables including additional variable called "source".**
 
 ## Calculate the total weight of trash collected by Professor Trash Wheel:
 ```{r total_prof}
