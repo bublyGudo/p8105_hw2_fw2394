@@ -92,6 +92,7 @@ nyc_transit_long |>
   count() 
 ```
 
+
 # Problem 2
 
 ## Load dataset "Mr. Trash Wheel" and clean_up:
@@ -154,6 +155,7 @@ mr_prof_gwy |>
   filter(source == "gwynnda_trash_wheel", year == "2022", month =="June")|> 
   summarise(number_cig = sum(cigarette_butts, na.rm = TRUE))
 ```
+
 
 # Problem 3
 
