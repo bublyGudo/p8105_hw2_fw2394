@@ -7,6 +7,7 @@ editor_options:
   chunk_output_type: inline
 ---
 # Problem 1
+
 ## Set up the working_directory: 
 ```{r working_directory}
 setwd("/Users/fangwang/Downloads/P8105 Data Science I/p8105_hw2_fw2394")
